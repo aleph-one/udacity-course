@@ -16,12 +16,16 @@ import 'package:task_04_navigation/unit.dart';
 class ConverterRoute extends StatelessWidget {
   /// Units for this [Category].
   final List<Unit> units;
+  final String name;
+  final Color color;
 
   /// This [ConverterRoute] requires the name, color, and units to not be null.
   // TODO: Pass in the [Category]'s name and color
-  const ConverterRoute({
-    @required this.units,
-  }) : assert(units != null);
+  const ConverterRoute(
+    this.units,
+    this.name,
+    this.color
+  ) : assert(units != null);
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +33,7 @@ class ConverterRoute extends StatelessWidget {
     final unitWidgets = units.map((Unit unit) {
       // TODO: Set the color for this Container
       return Container(
+        color: this.color,
         margin: EdgeInsets.all(8.0),
         padding: EdgeInsets.all(16.0),
         child: Column(
