@@ -38,12 +38,12 @@ class ConverterRoute extends StatefulWidget {
 }
 
 class _ConverterRouteState extends State<ConverterRoute> {
-  // TODO: Set some variables, such as for keeping track of the user's input
-  // value and units
+  Unit inputUnit;
+  String inputText;
+  String inputError;
 
-  // TODO: Determine whether you need to override anything, such as initState()
-
-  // TODO: Add other helper functions. We've given you one, _format()
+  Unit outputUnit;
+  TextEditingController outputText = TextEditingController();
 
   /// Clean up conversion; trim trailing zeros, e.g. 5.500 -> 5.5, 10.0 -> 10
   String _format(double conversion) {
@@ -61,41 +61,134 @@ class _ConverterRouteState extends State<ConverterRoute> {
     return outputNum;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // TODO: Create the 'input' group of widgets. This is a Column that
-    // includes the input value, and 'from' unit [Dropdown].
+  double _parse(String input) {
+    double result = double.tryParse(input);
+    if (result == null) {
+      inputError = 'Not a number';
+      return null;
+    } else {
+      inputError = null;
+      return result;
+    }
+  }
 
-    // TODO: Create a compare arrows icon.
-
-    // TODO: Create the 'output' group of widgets. This is a Column that
-    // includes the output value, and 'to' unit [Dropdown].
-
-    // TODO: Return the input, arrows, and output widgets, wrapped in a Column.
-
-    // TODO: Delete the below placeholder code.
-    final unitWidgets = widget.units.map((Unit unit) {
-      return Container(
-        color: widget.color,
-        margin: EdgeInsets.all(8.0),
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            Text(
-              unit.name,
-              style: Theme.of(context).textTheme.headline,
-            ),
-            Text(
-              'Conversion: ${unit.conversion}',
-              style: Theme.of(context).textTheme.subhead,
-            ),
-          ],
-        ),
+  createDropdown() {
+    return widget.units.map((Unit unit) {
+      return DropdownMenuItem<Unit>(
+        child: Text(unit.name),
+        value: unit,
       );
     }).toList();
+  }
 
-    return ListView(
-      children: unitWidgets,
+  convertInput() {
+    double x = _parse(this.inputText);
+    if (x != null && this.inputUnit != null && this.outputUnit != null) {
+      double result = x / this.inputUnit.conversion * this.outputUnit.conversion;
+      this.outputText.text =_format(result);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var inp = Padding(
+      padding: _padding,
+      child: Column(
+        children: <Widget>[
+          TextField(
+            onChanged: (input) {
+              setState(() {
+                this.inputText = input;
+                convertInput();
+              });
+            },
+            keyboardType:
+                TextInputType.numberWithOptions(decimal: true, signed: true),
+            decoration: InputDecoration(
+              labelText: 'Input',
+              border: OutlineInputBorder(),
+              errorText: this.inputError,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 8.0),
+            child: InputDecorator(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+              ),
+              child: DropdownButton(
+                isDense: true,
+                isExpanded: true,
+                underline: null,
+                value: this.inputUnit,
+                items: createDropdown(),
+                onChanged: (unit) {
+                  setState(() {
+                    this.inputUnit = unit;
+                    convertInput();
+                  });
+                },
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+    var comp = RotatedBox(
+      quarterTurns: 1,
+      child: Icon(
+        Icons.compare_arrows,
+        size: 40.0,
+      ),
+    );
+
+    var outp = Padding(
+      padding: _padding,
+      child: Column(
+        children: <Widget>[
+          TextField(
+            controller: outputText,
+            keyboardType:
+                TextInputType.numberWithOptions(decimal: true, signed: true),
+            decoration: InputDecoration(
+              labelText: 'Output',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 8.0),
+            child: InputDecorator(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+              ),
+              child: DropdownButton(
+                isDense: true,
+                isExpanded: true,
+                underline: null,
+                value: this.outputUnit,
+                items: createDropdown(),
+                onChanged: (unit) {
+                  setState(() {
+                    this.outputUnit = unit;
+                    convertInput();
+                  });
+                },
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+
+    return Padding(
+      child: Column(
+        children: <Widget>[
+          inp,
+          comp,
+          outp,
+        ],
+      ),
+      padding: _padding,
     );
   }
 }
