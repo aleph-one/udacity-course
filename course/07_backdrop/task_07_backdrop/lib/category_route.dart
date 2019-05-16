@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:task_07_backdrop/backdrop.dart';
 
 import 'category.dart';
 import 'category_tile.dart';
@@ -27,6 +28,8 @@ class CategoryRoute extends StatefulWidget {
 class _CategoryRouteState extends State<CategoryRoute> {
   // TODO: Keep track of a default [Category], and the currently-selected
   // [Category]
+  Category current;
+
   final _categories = <Category>[];
   static const _categoryNames = <String>[
     'Length',
@@ -86,11 +89,16 @@ class _CategoryRouteState extends State<CategoryRoute> {
         units: _retrieveUnitList(_categoryNames[i]),
       ));
     }
+    this.current = _categories[0];
   }
 
   // TODO: Fill out this function
   /// Function to call when a [Category] is tapped.
-  void _onCategoryTap(Category category) {}
+  void _onCategoryTap(Category category) {
+    setState(() {
+      this.current = category;
+    });
+  }
 
   /// Makes the correct number of rows for the list view.
   ///
@@ -126,6 +134,13 @@ class _CategoryRouteState extends State<CategoryRoute> {
       padding: EdgeInsets.symmetric(horizontal: 8.0),
       child: _buildCategoryWidgets(),
     );
+    Backdrop bd = Backdrop(
+      currentCategory: this.current,
+      backPanel: listView,
+      backTitle: Text('Unit Converter'),
+      frontPanel: CategoryTile(category: this.current, onTap: _onCategoryTap),
+      frontTitle: Text(this.current.name),
+    );
 
     final appBar = AppBar(
       elevation: 0.0,
@@ -142,7 +157,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
 
     return Scaffold(
       appBar: appBar,
-      body: listView,
+      body: bd,
     );
   }
 }

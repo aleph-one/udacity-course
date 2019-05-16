@@ -45,6 +45,15 @@ class _ConverterRouteState extends State<ConverterRoute> {
   Unit outputUnit;
   TextEditingController outputText = TextEditingController();
 
+  List<DropdownMenuItem<Unit>> dropdownItems;
+
+  initState() {
+    super.initState();
+    this.dropdownItems = _createDropdownItems();
+    this.inputUnit = widget.units[0];
+    this.outputUnit = widget.units[1];
+  }
+
   /// Clean up conversion; trim trailing zeros, e.g. 5.500 -> 5.5, 10.0 -> 10
   String _format(double conversion) {
     var outputNum = conversion.toStringAsPrecision(7);
@@ -72,7 +81,7 @@ class _ConverterRouteState extends State<ConverterRoute> {
     }
   }
 
-  createDropdown() {
+  _createDropdownItems() {
     return widget.units.map((Unit unit) {
       return DropdownMenuItem<Unit>(
         child: Text(unit.name),
@@ -81,11 +90,12 @@ class _ConverterRouteState extends State<ConverterRoute> {
     }).toList();
   }
 
-  convertInput() {
+  _convertInput() {
     double x = _parse(this.inputText);
     if (x != null && this.inputUnit != null && this.outputUnit != null) {
-      double result = x / this.inputUnit.conversion * this.outputUnit.conversion;
-      this.outputText.text =_format(result);
+      double result =
+          x / this.inputUnit.conversion * this.outputUnit.conversion;
+      this.outputText.text = _format(result);
     }
   }
 
@@ -99,7 +109,7 @@ class _ConverterRouteState extends State<ConverterRoute> {
             onChanged: (input) {
               setState(() {
                 this.inputText = input;
-                convertInput();
+                _convertInput();
               });
             },
             keyboardType:
@@ -116,18 +126,20 @@ class _ConverterRouteState extends State<ConverterRoute> {
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
               ),
-              child: DropdownButton(
-                isDense: true,
-                isExpanded: true,
-                underline: null,
-                value: this.inputUnit,
-                items: createDropdown(),
-                onChanged: (unit) {
-                  setState(() {
-                    this.inputUnit = unit;
-                    convertInput();
-                  });
-                },
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton(
+                  isDense: true,
+                  isExpanded: true,
+                  underline: null,
+                  value: this.inputUnit,
+                  items: this.dropdownItems,
+                  onChanged: (unit) {
+                    setState(() {
+                      this.inputUnit = unit;
+                      _convertInput();
+                    });
+                  },
+                ),
               ),
             ),
           )
@@ -148,6 +160,8 @@ class _ConverterRouteState extends State<ConverterRoute> {
         children: <Widget>[
           TextField(
             controller: outputText,
+            enabled: false,
+
             keyboardType:
                 TextInputType.numberWithOptions(decimal: true, signed: true),
             decoration: InputDecoration(
@@ -161,18 +175,20 @@ class _ConverterRouteState extends State<ConverterRoute> {
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
               ),
-              child: DropdownButton(
-                isDense: true,
-                isExpanded: true,
-                underline: null,
-                value: this.outputUnit,
-                items: createDropdown(),
-                onChanged: (unit) {
-                  setState(() {
-                    this.outputUnit = unit;
-                    convertInput();
-                  });
-                },
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton(
+                  isDense: true,
+                  isExpanded: true,
+                  underline: null,
+                  value: this.outputUnit,
+                  items: this.dropdownItems,
+                  onChanged: (unit) {
+                    setState(() {
+                      this.outputUnit = unit;
+                      _convertInput();
+                    });
+                  },
+                ),
               ),
             ),
           )
